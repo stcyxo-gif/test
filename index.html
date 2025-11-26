@@ -1,0 +1,916 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>霍金斯能量层级情绪抽卡系统</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Microsoft YaHei', sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #1a2a6c, #b21f1f, #fdbb2d);
+            color: #fff;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            background: linear-gradient(90deg, #ff8a00, #e52e71);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .subtitle {
+            font-size: 1.2rem;
+            color: #ddd;
+            margin-bottom: 10px;
+        }
+        
+        .info-box {
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 8px;
+            padding: 10px;
+            margin-top: 10px;
+            font-size: 0.9rem;
+            color: #ccc;
+            max-width: 800px;
+            margin: 10px auto;
+        }
+        
+        .main-content {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+        
+        .selection-section {
+            flex: 1;
+            min-width: 300px;
+            background: rgba(0, 0, 0, 0.4);
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        .card-section {
+            flex: 1;
+            min-width: 300px;
+            background: rgba(0, 0, 0, 0.4);
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        .history-section {
+            flex: 100%;
+            background: rgba(0, 0, 0, 0.4);
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            margin-top: 20px;
+        }
+        
+        .section-title {
+            font-size: 1.5rem;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #444;
+            color: #ffcc00;
+        }
+        
+        .emotion-selector {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 10px;
+            margin-bottom: 20px;
+            max-height: 400px;
+            overflow-y: auto;
+            padding: 10px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 10px;
+        }
+        
+        .emotion-btn {
+            padding: 12px 10px;
+            border: none;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: center;
+        }
+        
+        .emotion-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-3px);
+        }
+        
+        .emotion-btn.selected {
+            background: linear-gradient(135deg, #ff8a00, #e52e71);
+            box-shadow: 0 5px 15px rgba(229, 46, 113, 0.4);
+        }
+        
+        .draw-btn {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 8px;
+            background: linear-gradient(135deg, #ff8a00, #e52e71);
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            width: 100%;
+            margin-top: 10px;
+        }
+        
+        .draw-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(229, 46, 113, 0.4);
+        }
+        
+        .draw-btn:active {
+            transform: translateY(1px);
+        }
+        
+        .card {
+            width: 100%;
+            min-height: 450px;
+            border-radius: 15px;
+            padding: 20px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            transition: transform 0.5s;
+        }
+        
+        .card:hover {
+            transform: scale(1.02);
+        }
+        
+        .card-header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        
+        .card-name {
+            font-size: 2rem;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        
+        .card-level {
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+        
+        .card-content {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-around;
+        }
+        
+        .card-item {
+            margin-bottom: 15px;
+        }
+        
+        .card-item-title {
+            font-size: 1.1rem;
+            font-weight: bold;
+            margin-bottom: 5px;
+            color: #ffcc00;
+        }
+        
+        .card-examples {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            padding: 10px;
+            margin-top: 5px;
+        }
+        
+        .example-item {
+            margin-bottom: 8px;
+            padding-left: 15px;
+            position: relative;
+        }
+        
+        .example-item:before {
+            content: "•";
+            position: absolute;
+            left: 5px;
+            color: #ffcc00;
+        }
+        
+        .card-footer {
+            text-align: center;
+            font-style: italic;
+            margin-top: 15px;
+            color: #ccc;
+        }
+        
+        .chart-container {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
+            padding: 15px;
+            margin-top: 20px;
+            height: 300px;
+        }
+        
+        .history-list {
+            max-height: 200px;
+            overflow-y: auto;
+            margin-bottom: 20px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
+            padding: 10px;
+        }
+        
+        .history-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 10px;
+            border-bottom: 1px solid #333;
+        }
+        
+        .history-item:last-child {
+            border-bottom: none;
+        }
+        
+        .clear-btn {
+            background: linear-gradient(135deg, #ff416c, #ff4b2b);
+            width: 100%;
+            padding: 10px;
+            border: none;
+            border-radius: 8px;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        
+        .empty-state {
+            text-align: center;
+            color: #888;
+            padding: 20px;
+        }
+        
+        .energy-scale {
+            margin-top: 20px;
+            padding: 15px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
+        }
+        
+        .scale-title {
+            font-size: 1.2rem;
+            margin-bottom: 10px;
+            color: #ffcc00;
+            text-align: center;
+        }
+        
+        .scale-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 5px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        .scale-item:last-child {
+            border-bottom: none;
+        }
+        
+        @media (max-width: 768px) {
+            .main-content {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>霍金斯能量层级情绪抽卡系统</h1>
+            <p class="subtitle">选择您当前的情绪，探索能量层级，记录情绪变化趋势</p>
+            <div class="info-box">
+                <p>根据大卫·霍金斯博士的意识能量层级理论，情绪状态对应不同的能量数值</p>
+                <p>选择您当前的情绪状态，了解其能量层级、产生原因和提升方法</p>
+            </div>
+        </header>
+        
+        <div class="main-content">
+            <section class="selection-section">
+                <h2 class="section-title">选择当前情绪</h2>
+                <div class="emotion-selector" id="emotionSelector">
+                    <!-- 情绪按钮将通过JS动态生成 -->
+                </div>
+                <button class="draw-btn" id="drawCard">记录当前情绪</button>
+                
+                <div class="energy-scale">
+                    <div class="scale-title">霍金斯能量层级概览</div>
+                    <div id="energyScale">
+                        <!-- 能量层级概览将通过JS动态生成 -->
+                    </div>
+                </div>
+                
+                <div class="history-list" id="historyList">
+                    <p class="empty-state">情绪记录将显示在这里</p>
+                </div>
+                <button class="clear-btn" id="clearHistory">清除历史记录</button>
+            </section>
+            
+            <section class="card-section">
+                <h2 class="section-title">情绪能量卡</h2>
+                <div class="card" id="emotionCard">
+                    <div class="empty-state">请选择一种情绪查看能量卡</div>
+                </div>
+            </section>
+            
+            <section class="history-section">
+                <h2 class="section-title">情绪能量走势图</h2>
+                <div class="chart-container">
+                    <canvas id="energyChart"></canvas>
+                </div>
+            </section>
+        </div>
+    </div>
+
+    <script>
+        // 霍金斯能量层级数据（已添加新情绪并修改羞愧能量级）
+        const hawkinsLevels = [
+            {
+                name: "开悟",
+                level: 700,
+                color: "#8B00FF",
+                description: "最高级别的意识状态，与宇宙合一",
+                causes: "超越自我，与宇宙意识连接",
+                improvement: "已处于最高能量状态，保持并分享这种能量",
+                examples: [
+                    "每日进行深度冥想，感受与宇宙的连接",
+                    "无私地帮助他人，分享智慧和爱",
+                    "保持觉知，在每个当下体验生命的圆满"
+                ]
+            },
+            {
+                name: "平和",
+                level: 600,
+                color: "#4B0082",
+                description: "超越理性的状态，内在平静与喜悦",
+                causes: "深刻的内在觉知和接纳",
+                improvement: "继续深化冥想和内在觉察，向开悟状态迈进",
+                examples: [
+                    "每天花30分钟静坐，观察呼吸和念头",
+                    "练习接纳一切发生，不评判好坏",
+                    "在自然中散步，感受与环境的和谐"
+                ]
+            },
+            {
+                name: "喜悦",
+                level: 540,
+                color: "#FF1493",
+                description: "慈悲，无条件爱的状态",
+                causes: "对生命深刻的理解和接纳",
+                improvement: "培养无条件的爱和慈悲心，向平和状态发展",
+                examples: [
+                    "每天记录三件感恩的事情",
+                    "练习慈心冥想，向自己和他人发送祝福",
+                    "参与能带来快乐和满足感的活动"
+                ]
+            },
+            {
+                name: "爱",
+                level: 500,
+                color: "#FF0000",
+                description: "超越理性的爱，滋养生命的能量",
+                causes: "深刻的情感连接和同理心",
+                improvement: "练习无条件爱和宽恕，向喜悦状态提升",
+                examples: [
+                    "每天向亲近的人表达爱和感激",
+                    "练习宽恕那些曾经伤害过你的人",
+                    "培养对陌生人的善意和关怀"
+                ]
+            },
+            {
+                name: "理性",
+                level: 400,
+                color: "#FF8C00",
+                description: "智慧，能够处理复杂信息",
+                causes: "教育和知识积累，理性思考",
+                improvement: "培养直觉和心灵智慧，超越纯粹理性",
+                examples: [
+                    "每天阅读有深度的书籍或文章",
+                    "练习批判性思维，分析问题的多个角度",
+                    "尝试用直觉做决定，而不仅仅是逻辑"
+                ]
+            },
+            {
+                name: "接纳",
+                level: 350,
+                color: "#FFD700",
+                description: "积极看待生活，主动创造改变",
+                causes: "对生活的积极态度和主动参与",
+                improvement: "培养感恩和欣赏的心态，向爱的状态发展",
+                examples: [
+                    "每天写下至少五件值得感激的事情",
+                    "练习正念，全然地接受当下体验",
+                    "主动寻找困境中的成长机会"
+                ]
+            },
+            {
+                name: "愿意",
+                level: 310,
+                color: "#ADFF2F",
+                description: "乐观，看向积极的可能性",
+                causes: "对未来的希望和积极预期",
+                improvement: "设定明确目标并采取行动，向接纳状态迈进",
+                examples: [
+                    "制定具体可行的短期和长期目标",
+                    "每天采取小步骤向目标前进",
+                    "与积极乐观的人交往，互相鼓励"
+                ]
+            },
+            {
+                name: "中立",
+                level: 250,
+                color: "#32CD32",
+                description: "信任，释放控制，灵活应对",
+                causes: "对生活的信任和放松态度",
+                improvement: "培养主动性和积极态度，向愿意状态发展",
+                examples: [
+                    "练习放下对结果的执着，关注过程",
+                    "培养对生活基本善意的信任",
+                    "在变化中寻找机会而非威胁"
+                ]
+            },
+            {
+                name: "勇气",
+                level: 200,
+                color: "#00FF7F",
+                description: "有能力面对挑战，成长起点",
+                causes: "面对困难的决心和行动力",
+                improvement: "持续面对挑战，培养自信心，向中立状态提升",
+                examples: [
+                    "每天做一件稍微超出舒适区的小事",
+                    "面对恐惧时采取行动而非逃避",
+                    "记录并庆祝自己的每一个小成就"
+                ]
+            },
+            {
+                name: "骄傲",
+                level: 175,
+                color: "#FF4500",
+                description: "自我膨胀，防御性强",
+                causes: "过度重视自我形象和成就",
+                improvement: "培养谦逊，认识到骄傲的局限性，向勇气状态转变",
+                examples: [
+                    "主动承认自己的错误和不足",
+                    "真诚地听取他人的反馈和建议",
+                    "关注团队合作而非个人表现"
+                ]
+            },
+            {
+                name: "嫉妒",
+                level: 175,
+                color: "#FF6347",
+                description: "对他人拥有的感到不满和羡慕",
+                causes: "比较心理，缺乏自我价值感",
+                improvement: "培养感恩之心，专注于自身成长和优势",
+                examples: [
+                    "列出自己已经拥有的优势和资源",
+                    "将嫉妒转化为向他人学习的动力",
+                    "练习为别人的成功真诚地感到高兴"
+                ]
+            },
+            {
+                name: "愤怒",
+                level: 150,
+                color: "#DC143C",
+                description: "挫败感，可能导致攻击性",
+                causes: "需求未满足或目标受阻",
+                improvement: "学习有效沟通和情绪管理，向勇气状态发展",
+                examples: [
+                    "练习深呼吸，在愤怒时暂停反应",
+                    "用'我感到...'句式表达需求而非指责",
+                    "通过运动或创造性活动释放愤怒能量"
+                ]
+            },
+            {
+                name: "欲望",
+                level: 125,
+                color: "#FF69B4",
+                description: "渴望，上瘾，永不满足",
+                causes: "对外在事物的过度依赖和追求",
+                improvement: "培养内在满足感，减少对外在事物的依赖",
+                examples: [
+                    "练习延迟满足，等待24小时再做购买决定",
+                    "培养不需要消费的快乐来源",
+                    "通过冥想觉察欲望的升起和消逝"
+                ]
+            },
+            {
+                name: "恐惧",
+                level: 100,
+                color: "#8A2BE2",
+                description: "焦虑，担心，限制成长",
+                causes: "对未知或潜在威胁的过度关注",
+                improvement: "面对恐惧，采取小步骤行动，建立安全感",
+                examples: [
+                    "将大目标分解为可行的小步骤",
+                    "练习暴露疗法，逐步面对恐惧情境",
+                    "培养支持系统，与信任的人分享恐惧"
+                ]
+            },
+            {
+                name: "焦虑",
+                level: 88,
+                color: "#9370DB",
+                description: "持续的担忧和不安",
+                causes: "对未来不确定性的过度思考",
+                improvement: "练习正念冥想，专注于当下，减少对未来的担忧",
+                examples: [
+                    "每天练习10分钟正念呼吸",
+                    "将担忧写下来并评估其真实发生的可能性",
+                    "建立日常规律，增加可预测性和控制感"
+                ]
+            },
+            {
+                name: "悲伤",
+                level: 75,
+                color: "#1E90FF",
+                description: "失落，依赖，过去导向",
+                causes: "失去重要的人或事物",
+                improvement: "接受失去，关注当下，寻找新意义",
+                examples: [
+                    "允许自己感受和表达悲伤，不压抑",
+                    "通过写作或艺术创作表达情感",
+                    "寻找失去事件中的意义和成长机会"
+                ]
+            },
+            {
+                name: "纠结",
+                level: 66,
+                color: "#4169E1",
+                description: "犹豫不决，难以做出选择",
+                causes: "害怕做出错误决定，过度分析",
+                improvement: "练习决策能力，接受不完美，信任直觉",
+                examples: [
+                    "为决策设定时间限制，避免过度思考",
+                    "列出每个选项的利弊，然后相信直觉选择",
+                    "接受任何决定都有学习价值，没有完美选择"
+                ]
+            },
+            {
+                name: "冷淡",
+                level: 50,
+                color: "#696969",
+                description: "绝望，放弃，需要外部支持",
+                causes: "长期挫折感或无望感",
+                improvement: "寻求支持，设定小目标，重建希望",
+                examples: [
+                    "联系朋友或家人，分享感受",
+                    "每天完成一个极小的、可实现的任务",
+                    "寻求专业心理咨询或支持小组"
+                ]
+            },
+            {
+                name: "内疚",
+                level: 30,
+                color: "#2F4F4F",
+                description: "自责，受害者心态，可能自我惩罚",
+                causes: "认为自己做错了事或伤害了他人",
+                improvement: "学习宽恕自己，承担责任并修正错误",
+                examples: [
+                    "如果可能，向受影响的人道歉并弥补",
+                    "写下自我宽恕的声明并每天阅读",
+                    "从错误中学习，制定避免重犯的计划"
+                ]
+            },
+            {
+                name: "疲倦",
+                level: 0,
+                color: "#808080",
+                description: "身心疲惫，缺乏能量",
+                causes: "过度劳累，缺乏休息和恢复",
+                improvement: "确保充足休息，调整生活节奏，寻求支持",
+                examples: [
+                    "确保每晚7-8小时高质量睡眠",
+                    "学习说'不'，减少不必要的承诺",
+                    "安排定期休息时间，避免过度消耗"
+                ]
+            },
+            {
+                name: "绝望",
+                level: -10,
+                color: "#2F4F4F",
+                description: "完全失去希望，无助感",
+                causes: "长期困境，看不到出路",
+                improvement: "寻求专业帮助，建立支持系统，寻找微小希望",
+                examples: [
+                    "立即联系心理健康热线或危机干预服务",
+                    "与信任的人保持日常联系，不孤立自己",
+                    "专注于当下的小确幸，如一杯热茶、阳光"
+                ]
+            },
+            {
+                name: "羞愧",
+                level: -20,
+                color: "#000000",
+                description: "自我否定，接近死亡状态",
+                causes: "深刻的自我否定或无价值感",
+                improvement: "寻求专业帮助，重建自我价值感",
+                examples: [
+                    "寻求心理咨询师或治疗师的帮助",
+                    "练习自我同情，像对待好友一样对待自己",
+                    "从小事开始重建自信，记录每一个进步"
+                ]
+            }
+        ];
+
+        // 初始化历史记录
+        let emotionHistory = JSON.parse(localStorage.getItem('emotionHistory')) || [];
+        
+        // DOM元素
+        const emotionSelector = document.getElementById('emotionSelector');
+        const emotionCard = document.getElementById('emotionCard');
+        const historyList = document.getElementById('historyList');
+        const energyScale = document.getElementById('energyScale');
+        const drawCardBtn = document.getElementById('drawCard');
+        const clearHistoryBtn = document.getElementById('clearHistory');
+        let energyChart = null;
+        
+        // 当前选择的情绪
+        let selectedEmotion = null;
+
+        // 初始化页面
+        initEmotionSelector();
+        initEnergyScale();
+        updateHistoryList();
+        renderChart();
+
+        // 初始化情绪选择器
+        function initEmotionSelector() {
+            emotionSelector.innerHTML = '';
+            
+            // 按能量层级降序排列
+            const sortedLevels = [...hawkinsLevels].sort((a, b) => b.level - a.level);
+            
+            sortedLevels.forEach(emotion => {
+                const emotionBtn = document.createElement('button');
+                emotionBtn.className = 'emotion-btn';
+                emotionBtn.textContent = `${emotion.name} (${emotion.level})`;
+                emotionBtn.dataset.emotion = emotion.name;
+                
+                emotionBtn.addEventListener('click', () => {
+                    // 移除之前的选择
+                    document.querySelectorAll('.emotion-btn').forEach(btn => {
+                        btn.classList.remove('selected');
+                    });
+                    
+                    // 选择当前情绪
+                    emotionBtn.classList.add('selected');
+                    selectedEmotion = emotion;
+                    
+                    // 立即显示情绪卡片
+                    displayEmotionCard(emotion);
+                });
+                
+                emotionSelector.appendChild(emotionBtn);
+            });
+        }
+
+        // 初始化能量层级概览
+        function initEnergyScale() {
+            energyScale.innerHTML = '';
+            
+            // 按能量层级降序排列
+            const sortedLevels = [...hawkinsLevels].sort((a, b) => b.level - a.level);
+            
+            sortedLevels.forEach(emotion => {
+                const scaleItem = document.createElement('div');
+                scaleItem.className = 'scale-item';
+                
+                scaleItem.innerHTML = `
+                    <span>${emotion.name}</span>
+                    <span>${emotion.level}</span>
+                `;
+                
+                energyScale.appendChild(scaleItem);
+            });
+        }
+
+        // 记录当前情绪
+        drawCardBtn.addEventListener('click', () => {
+            if (!selectedEmotion) {
+                alert('请先选择一种情绪');
+                return;
+            }
+            
+            addToHistory(selectedEmotion);
+            updateHistoryList();
+            renderChart();
+        });
+
+        // 清除历史记录
+        clearHistoryBtn.addEventListener('click', () => {
+            if (confirm('确定要清除所有情绪记录吗？此操作不可撤销。')) {
+                emotionHistory = [];
+                localStorage.setItem('emotionHistory', JSON.stringify(emotionHistory));
+                updateHistoryList();
+                renderChart();
+                emotionCard.innerHTML = '<div class="empty-state">请选择一种情绪查看能量卡</div>';
+            }
+        });
+
+        // 显示情绪卡片
+        function displayEmotionCard(emotion) {
+            emotionCard.innerHTML = '';
+            emotionCard.style.background = `linear-gradient(135deg, ${emotion.color}30, ${emotion.color}60)`;
+            emotionCard.style.border = `3px solid ${emotion.color}`;
+            
+            // 构建示例HTML
+            let examplesHTML = '';
+            if (emotion.examples && emotion.examples.length > 0) {
+                examplesHTML = `
+                    <div class="card-examples">
+                        ${emotion.examples.map(example => 
+                            `<div class="example-item">${example}</div>`
+                        ).join('')}
+                    </div>
+                `;
+            }
+            
+            const cardHTML = `
+                <div class="card-header">
+                    <div class="card-name">${emotion.name}</div>
+                    <div class="card-level">能量层级: ${emotion.level}</div>
+                </div>
+                <div class="card-content">
+                    <div class="card-item">
+                        <div class="card-item-title">描述</div>
+                        <div>${emotion.description}</div>
+                    </div>
+                    <div class="card-item">
+                        <div class="card-item-title">产生原因</div>
+                        <div>${emotion.causes}</div>
+                    </div>
+                    <div class="card-item">
+                        <div class="card-item-title">提升方法</div>
+                        <div>${emotion.improvement}</div>
+                        ${examplesHTML}
+                    </div>
+                </div>
+                <div class="card-footer">
+                    选择时间: ${new Date().toLocaleString()}
+                </div>
+            `;
+            
+            emotionCard.innerHTML = cardHTML;
+        }
+
+        // 添加到历史记录
+        function addToHistory(emotion) {
+            const record = {
+                name: emotion.name,
+                level: emotion.level,
+                timestamp: new Date().toLocaleString(),
+                date: new Date().toISOString().split('T')[0]
+            };
+            
+            emotionHistory.unshift(record);
+            
+            // 限制历史记录数量（最多100条）
+            if (emotionHistory.length > 100) {
+                emotionHistory = emotionHistory.slice(0, 100);
+            }
+            
+            localStorage.setItem('emotionHistory', JSON.stringify(emotionHistory));
+        }
+
+        // 更新历史记录列表
+        function updateHistoryList() {
+            historyList.innerHTML = '';
+            
+            if (emotionHistory.length === 0) {
+                historyList.innerHTML = '<p class="empty-state">暂无情绪记录</p>';
+                return;
+            }
+            
+            // 只显示最近20条记录
+            const recentHistory = emotionHistory.slice(0, 20);
+            
+            recentHistory.forEach(record => {
+                const historyItem = document.createElement('div');
+                historyItem.className = 'history-item';
+                
+                historyItem.innerHTML = `
+                    <span>${record.name}</span>
+                    <span>能量: ${record.level}</span>
+                    <span style="font-size: 0.8rem; color: #aaa;">${record.timestamp}</span>
+                `;
+                
+                historyList.appendChild(historyItem);
+            });
+        }
+
+        // 渲染图表
+        function renderChart() {
+            const ctx = document.getElementById('energyChart').getContext('2d');
+            
+            // 如果已有图表实例，先销毁
+            if (energyChart) {
+                energyChart.destroy();
+            }
+            
+            // 按日期分组数据
+            const dates = [];
+            const levels = [];
+            
+            // 反转历史记录，使最早的数据在前
+            const reversedHistory = [...emotionHistory].reverse();
+            
+            reversedHistory.forEach(record => {
+                dates.push(record.timestamp.split(' ')[0]);
+                levels.push(record.level);
+            });
+            
+            // 创建图表
+            energyChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: dates,
+                    datasets: [{
+                        label: '情绪能量层级',
+                        data: levels,
+                        borderColor: '#ff8a00',
+                        backgroundColor: 'rgba(255, 138, 0, 0.1)',
+                        borderWidth: 2,
+                        fill: true,
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: false,
+                            suggestedMin: -30,
+                            suggestedMax: 700,
+                            title: {
+                                display: true,
+                                text: '能量层级'
+                            }
+                        },
+                        x: {
+                            title: {
+                                display: true,
+                                text: '日期'
+                            }
+                        }
+                    },
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: '情绪能量层级变化趋势',
+                            color: '#fff',
+                            font: {
+                                size: 16
+                            }
+                        },
+                        legend: {
+                            labels: {
+                                color: '#fff'
+                            }
+                        }
+                    }
+                }
+            });
+        }
+    </script>
+</body>
+</html>
